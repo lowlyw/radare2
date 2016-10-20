@@ -76,17 +76,21 @@ static int stdprintifunion (void *p, const char *k, const char *v) {
 		r_cons_println (k);
 	return 1;
 }
+
 static int sdbdelete (void *p, const char *k, const char *v) {
 	RCore *core = (RCore *)p;
 	r_anal_type_del (core->anal, k);
 	return 1;
 }
+
 static int sdbdeletelink (void *p, const char *k, const char *v) {
 	RCore *core = (RCore *)p;
-	if (!strncmp (k, "link.", strlen ("link.")))
+	if (!strncmp (k, "link.", strlen ("link."))) {
 		r_anal_type_del (core->anal, k);
+	}
 	return 1;
 }
+
 static int linklist (void *p, const char *k, const char *v) {
 	if (!strncmp (k, "link.", strlen ("link.")))
 		r_cons_printf ("tl %s = 0x%s\n", v, k + strlen ("link."));

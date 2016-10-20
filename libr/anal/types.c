@@ -22,22 +22,25 @@ R_API int r_anal_type_set(RAnal *anal, ut64 at, const char *field, ut64 val) {
 }
 
 R_API void r_anal_type_del(RAnal *anal, const char *name) {
-	int n;
-	char *p, str[128], str2[128];
-	Sdb *DB = anal->sdb_types;
-	const char *kind = sdb_const_get (DB, name, 0);
-	snprintf (str, sizeof (str), "%s.%s", kind, name);
-
-#define SDB_FOREACH(x,y,z) for (z = 0; (p = sdb_array_get (x, y, z, NULL)); z++)
-#define SDB_FOREACH_NEXT() free(p)
-	SDB_FOREACH (DB, str, n) {
-		snprintf (str2, sizeof (str2), "%s.%s", str, p);
-		sdb_unset (DB, str2, 0);
-		SDB_FOREACH_NEXT ();
+	Sdb *db = anal->sdb_types;
+	const char *kind = sdb_const_get (db, name, 0);
+	if (!kind) {
+		return;
 	}
-	sdb_set (DB, name, NULL, 0);
-	sdb_unset (DB, name, 0);
-	sdb_unset (DB, str, 0);
+// XXX to segfault or to leak that is the question
+#define SEGFAULT 0
+#if SEGFAULT
+	int n;
+	char *p;
+	snprintf (str, sizeof (str), "%s.%s", kind, name);
+	for (n = 0; (p = sdb_array_get (db, str, n, NULL)); n++) {
+		snprintf (str2, sizeof (str2), "%s.%s", str, p);
+		sdb_unset (db, str2, 0);
+		n++;
+	}
+	sdb_unset (db, str, 0);
+#endif
+	sdb_unset (db, name, 0);
 }
 
 R_API int r_anal_type_get_size(RAnal *anal, const char *type) {
